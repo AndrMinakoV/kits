@@ -22,10 +22,7 @@ public class KitMod
         KitsManager.loadKits();
     }
 
-    @SubscribeEvent
-    public static void onCommandRegister(RegisterCommandsEvent event){
-        KitCommand.register(event.getDispatcher());
-    }
+
 
 
 

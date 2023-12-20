@@ -10,26 +10,30 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.registries.ForgeRegistries;
 
 
 public class KitCommand {
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+    public KitCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(LiteralArgumentBuilder.<CommandSourceStack>literal("kit")
-                .then(Commands.argument("kitName", StringArgumentType.word())
-                        .executes(KitCommand::handleCommand)));
+                .then(Commands.argument("kitName", StringArgumentType.word()).executes(context -> handleCommand(context, StringArgumentType.getString(context, "kitName")))));
     }
     private static int kitTest(CommandSourceStack source) throws CommandSyntaxException {
         System.out.println("KIT TEST IS WORKING");
-
+        ServerPlayer serverPlayer = source.getPlayerOrException();
+        serverPlayer.getInventory().add(new ItemStack(Items.ACACIA_BOAT));
         source.sendSuccess(Component.literal("Test"), true);
         return 1;
     }
 
-    private static int handleCommand(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    private static int handleCommand(CommandContext<CommandSourceStack> context, String kitName) throws CommandSyntaxException {
         ServerPlayer player = context.getSource().getPlayerOrException();
-        String kitName = StringArgumentType.getString(context, "kitName");
         Kit kit = KitsManager.getKit(kitName);
         if (kit == null) {
             context.getSource().sendFailure(Component.literal("Kit not found."));
@@ -37,13 +41,16 @@ public class KitCommand {
         }
 
         for (ItemStack itemStack : kit.getItems()) {
-            if (!player.addItem(itemStack)) {
-                player.drop(itemStack, false);
+            if (!player.getInventory().add(itemStack.copy())) {
+                player.drop(itemStack.copy(), false);
             }
         }
 
         context.getSource().sendSuccess(Component.literal("Given kit " + kitName + " to " + player.getName().getString()), true);
         return 1;
     }
+
+
+
 }
 
