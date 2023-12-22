@@ -12,4 +12,5 @@ public class KitsContainer {
     public void setKits(List<Kit> kits) {
          this.kits = kits;
     }
+
 }
