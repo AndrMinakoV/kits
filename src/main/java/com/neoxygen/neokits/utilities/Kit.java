@@ -3,8 +3,8 @@ package com.neoxygen.neokits.utilities;
 import java.util.List;
 
 public class Kit {
-    public String name;
-    public List<Item> items;
+    private String name;
+    private List<Item> items;
 
     public List<Item> getItems() {
         return items;

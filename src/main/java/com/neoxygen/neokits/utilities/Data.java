@@ -33,19 +33,9 @@ public class Data {
 
     public static List<String> getAllKitsName(){
         List<String> list = new ArrayList<>();
-        for (Kit kit : Data.data.kits){
-            list.add(kit.name);
+        for (Kit kit : Data.data.getKits()){
+            list.add(kit.getName());
         }
-        Kit newKit = new Kit();
-        newKit.name = "fdsfsd";//имя будущего кита;
-        List<Item> itemList = new ArrayList<>();//список предметов на выдачу
-        Item item = new Item();//временный предмет
-        item.item = "dasdasd";//id итема который будет читаться с инвентаря
-        item.count = 10;//количество предмета (id)
-        itemList.add(item);
-
-
-
 
 
         return list;

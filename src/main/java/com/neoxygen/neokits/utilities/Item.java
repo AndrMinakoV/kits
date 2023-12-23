@@ -1,8 +1,8 @@
 package com.neoxygen.neokits.utilities;
 
 public class Item {
-    public String item;
-    public int count;
+    private String item;
+    private int count;
     public String getItem(){
         return item;
     }
