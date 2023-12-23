@@ -1,6 +1,7 @@
 package com.neoxygen.neokits;
 
 import com.google.gson.Gson;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.neoxygen.neokits.utilities.Data;
 import com.neoxygen.neokits.utilities.KitsContainer;
 import com.neoxygen.neokits.utilities.Item;
@@ -36,20 +37,28 @@ public class KitMod {
         public static void onRegisterCommands(RegisterCommandsEvent event) {
             // Регистрируем новую команду
             event.getDispatcher().register(Commands.literal("kit")
-                    .then(Commands.literal("penis")
-                            .executes(context -> kitPenis(context.getSource()))));
+                    .then(Commands.argument("kitName", StringArgumentType.word()).suggests((context, builder) -> {
+                            Data.getAllKitsName().forEach(builder::suggest);
+                            return builder.buildFuture();
+                            })
+                            .executes(context -> kitPenis(context.getSource(), StringArgumentType.getString(context, "kitName")))));
         }
-        private static int kitPenis(CommandSourceStack source) {
+        private static int kitPenis(CommandSourceStack source, String argument) {
             if (source.getEntity() instanceof ServerPlayer) {
                 ServerPlayer player = (ServerPlayer) source.getEntity();
                 for(Kit kit : Data.getData().kits){
-                    if (kit.name.equals("start")){
+                    if (kit.name.equals(argument)){
                         for (Item items : kit.items){
                             player.addItem(new ItemStack(ForgeRegistries.ITEMS.getValue(new ResourceLocation(items.item)), items.count));
                         }
                     }
                 }
             }
+            return 1;
+        }
+
+        private static int kitCreate(){
+            Data newData = new Data();
             return 1;
         }
     }

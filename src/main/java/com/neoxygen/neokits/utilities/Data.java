@@ -9,6 +9,8 @@ import net.minecraftforge.fml.common.Mod;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 @Mod.EventBusSubscriber(modid = KitMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class Data {
@@ -27,6 +29,26 @@ public class Data {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static List<String> getAllKitsName(){
+        List<String> list = new ArrayList<>();
+        for (Kit kit : Data.data.kits){
+            list.add(kit.name);
+        }
+        Kit newKit = new Kit();
+        newKit.name = "fdsfsd";//имя будущего кита;
+        List<Item> itemList = new ArrayList<>();//список предметов на выдачу
+        Item item = new Item();//временный предмет
+        item.item = "dasdasd";//id итема который будет читаться с инвентаря
+        item.count = 10;//количество предмета (id)
+        itemList.add(item);
+
+
+
+
+
+        return list;
     }
 
     @SubscribeEvent
