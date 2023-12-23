@@ -49,6 +49,7 @@ public class KitMod {
                 for(Kit kit : Data.getData().kits){
                     if (kit.name.equals(argument)){
                         for (Item items : kit.items){
+                            //переписать цикл к хуям собачим и щенячим
                             player.addItem(new ItemStack(ForgeRegistries.ITEMS.getValue(new ResourceLocation(items.item)), items.count));
                         }
                     }
