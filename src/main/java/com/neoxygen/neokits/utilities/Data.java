@@ -2,7 +2,10 @@ package com.neoxygen.neokits.utilities;
 
 import com.google.gson.Gson;
 import com.neoxygen.neokits.KitMod;
+import com.neoxygen.neokits.cooldowns.CooldownManager;
 import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -42,7 +45,14 @@ public class Data {
     }
 
     @SubscribeEvent
-    public static void onServerStarted(ServerStartedEvent event){
+    public static void onServerStarted(ServerStartingEvent event)
+    {
         loadData();
+        CooldownManager.loadCooldowns();
+    }
+
+    @SubscribeEvent
+    public static void onServerStarter(ServerStoppingEvent event){
+        CooldownManager.saveCooldowns();
     }
 }
