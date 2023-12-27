@@ -10,7 +10,6 @@ public class MessageFunctions {
     public static void broadcastMessageGlobal(MinecraftServer server, Component message) {
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             player.sendSystemMessage(message);
-
         }
     }
     public static void broadcastMessageLocal(ServerPlayer serverPlayer, Component message){
@@ -20,6 +19,11 @@ public class MessageFunctions {
                 player.sendSystemMessage(message);
             }
         }
+    }
+
+    public static void broadcastMcSkillMessage(ServerPlayer serverPlayer, String string){
+        Component finalMessage = Component.literal(  "§8[§6MagicRPG§8]: " + string);
+        serverPlayer.sendSystemMessage(finalMessage);
     }
 
     public static double compareCoordinateDistance(BlockPos playerPos1, BlockPos playerPos2){

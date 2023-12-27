@@ -6,6 +6,7 @@ public class Player {
     private String name;
     List<KitsCooldown> kitsCooldown;
 
+
     public String getName() {
         return name;
     }
@@ -19,3 +20,6 @@ public class Player {
         this.kitsCooldown = kitsCooldown;
     }
 }
+
+
+
