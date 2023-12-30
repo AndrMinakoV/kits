@@ -8,6 +8,7 @@ public class KitsCooldown {
         this.name = kitName;
         this.cooldownEnd = cooldownEnd;
     }
+    public KitsCooldown(){}
 
     public long getCooldownEnd() {
         return cooldownEnd;

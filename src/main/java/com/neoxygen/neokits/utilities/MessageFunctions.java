@@ -20,18 +20,14 @@ public class MessageFunctions {
             }
         }
     }
-
     public static void broadcastMcSkillMessage(ServerPlayer serverPlayer, String string){
         Component finalMessage = Component.literal(  "§8[§6MagicRPG§8]: " + string);
         serverPlayer.sendSystemMessage(finalMessage);
     }
-
     public static double compareCoordinateDistance(BlockPos playerPos1, BlockPos playerPos2){
         double x = (double) Math.abs(playerPos1.getX() - playerPos2.getX());
         double y = (double) Math.abs(playerPos1.getY() - playerPos2.getY());
         double z = (double) Math.abs(playerPos1.getZ() - playerPos2.getZ());
         return x + y + z;
     }
-
-
 }

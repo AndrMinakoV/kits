@@ -6,7 +6,12 @@ public class Kit {
     private String name;
     private List<Item> items;
     private long cooldown;
-
+    public Kit(String name, List<Item> items, long cooldown){
+        this.name = name;
+        this.items = items;
+        this.cooldown = cooldown;
+    }
+    public Kit(){}
     public long getCooldown(){return cooldown;}
     public void setCooldown(long cooldown){this.cooldown = cooldown;}
     public List<Item> getItems() {

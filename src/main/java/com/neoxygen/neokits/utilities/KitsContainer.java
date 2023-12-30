@@ -4,7 +4,6 @@ import java.util.List;
 
 public class KitsContainer {
     private List<Kit> kits;
-
     public List<Kit> getKits(){
         return kits;
     }
@@ -14,5 +13,4 @@ public class KitsContainer {
     public void setKits(List<Kit> kits) {
           this.kits = kits;
     }
-
 }

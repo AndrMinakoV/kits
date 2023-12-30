@@ -4,7 +4,6 @@ import java.util.List;
 
 public class PlayersContainer {
     private List<Player> players;
-
     public List<Player> getPlayers() {
         return players;
     }

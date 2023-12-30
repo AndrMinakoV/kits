@@ -5,8 +5,11 @@ import java.util.List;
 public class Player {
     private String name;
     List<KitsCooldown> kitsCooldown;
-
-
+    public Player(String name, List<KitsCooldown> kitsCooldown){
+        this.name = name;
+        this.kitsCooldown = kitsCooldown;
+    }
+    public Player(){}
     public String getName() {
         return name;
     }

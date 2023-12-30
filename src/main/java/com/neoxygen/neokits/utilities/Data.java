@@ -18,11 +18,9 @@ import java.util.List;
 @Mod.EventBusSubscriber(modid = KitMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class Data {
     private static KitsContainer data;
-
     public static KitsContainer getData(){
         return data;
     }
-
     public static void loadData(){
         try{
             Gson g = new Gson();
@@ -33,24 +31,19 @@ public class Data {
             throw new RuntimeException(e);
         }
     }
-
     public static List<String> getAllKitsName(){
         List<String> list = new ArrayList<>();
         for (Kit kit : Data.data.getKits()){
             list.add(kit.getName());
         }
-
-
         return list;
     }
-
     @SubscribeEvent
     public static void onServerStarted(ServerStartingEvent event)
     {
         loadData();
         CooldownManager.loadCooldowns();
     }
-
     @SubscribeEvent
     public static void onServerStarter(ServerStoppingEvent event){
         CooldownManager.saveCooldowns();
