@@ -21,7 +21,7 @@ public class MessageFunctions {
         }
     }
     public static void broadcastMcSkillMessage(ServerPlayer serverPlayer, String string){
-        Component finalMessage = Component.literal(  "§8[§6MagicRPG§8]: " + string);
+        Component finalMessage = Component.literal(  "§8[§6MagicRPG§8]: " + "§7" + string);
         serverPlayer.sendSystemMessage(finalMessage);
     }
     public static double compareCoordinateDistance(BlockPos playerPos1, BlockPos playerPos2){

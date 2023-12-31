@@ -2,7 +2,8 @@ package com.neoxygen.neokits.utilities;
 
 import java.util.List;
 
-public class Kit {
+public class
+Kit {
     private String name;
     private List<Item> items;
     private long cooldown;
