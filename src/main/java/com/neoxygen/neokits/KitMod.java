@@ -14,6 +14,7 @@ import com.neoxygen.neokits.utilities.Data;
 import com.neoxygen.neokits.utilities.Item;
 import com.neoxygen.neokits.utilities.Kit;
 import com.neoxygen.neokits.utilities.MessageFunctions;
+import net.luckperms.api.LuckPerms;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.resources.ResourceLocation;
@@ -23,6 +24,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.luckperms.api.LuckPermsProvider;
+import net.luckperms.api.cacheddata.CachedMetaData;
+import net.luckperms.api.model.user.User;
 
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -52,12 +56,13 @@ public class KitMod {
                                                 String cooldown = StringArgumentType.getString(context, "cooldown");
                                                 return kitCreate(context.getSource(), kitName, cooldown);
                                             }))))
+                    .then(Commands.literal("list")
+                                    .executes(context -> kitList(context.getSource())))
+//                    .then(Commands.literal("list"))
+//                            .executes(context -> kitList(context.getSource()))
                     .then(Commands.literal("claim")
                             .then(Commands.argument("kitName", StringArgumentType.word())
-                                    .suggests((context, builder) -> {
-                                        Data.getAllKitsName().forEach(builder::suggest);
-                                        return builder.buildFuture();
-                                    })
+                                    .suggests(KIT_SUGGESTIONS_PROVIDER)
                                     .executes(context -> handleKit(context.getSource(), StringArgumentType.getString(context, "kitName")))))
                     .then(Commands.literal("delete")
                             .then(Commands.argument("kitName", StringArgumentType.word())
@@ -82,35 +87,29 @@ public class KitMod {
             );
         }
         @SubscribeEvent
-        public static void onRegisterCommands(RegisterCommandsEvent event) {
+        public static void onRegisterCommands(RegisterCommandsEvent event){
             register(event.getDispatcher());
-//            event.getDispatcher().register(Commands.literal("deletekit")
-//                    .then(Commands.argument("kitName", StringArgumentType.word()).suggests((context, builder) -> {
-//                        Data.getAllKitsName().forEach(builder::suggest);
-//                        return builder.buildFuture();
-//                        })
-//                            .executes(context -> kitDelete(context.getSource(), StringArgumentType.getString(context, "kitName")))));
-//            // Создание китов
-//            event.getDispatcher().register(Commands.literal("createkit")
-//                    .then(Commands.argument("kitName", StringArgumentType.word())
-//                            .then(Commands.argument("cooldown", StringArgumentType.word()).suggests(COOLDOWN_SUGGESTIONS)
-//                            .executes(context -> {
-//                                String kitName = StringArgumentType.getString(context, "kitName");
-//                                String cooldown = StringArgumentType.getString(context, "cooldown");
-//                                return kitCreate(context.getSource(), kitName, cooldown);
-//                            }))));
-//            // Получение китов
-//            event.getDispatcher().register(Commands.literal("kit")
-//                    .then(Commands.argument("kitName", StringArgumentType.word()).suggests((context, builder) -> {
-//                        Data.getAllKitsName().forEach(builder::suggest);
-//                        return builder.buildFuture();
-//                        })
-//                            .executes(context -> handleKit(context.getSource(), StringArgumentType.getString(context, "kitName")))));
         }
         private static final SuggestionProvider<CommandSourceStack> PLAYER_SUGGESTIONS_PROVIDER
                 = CommandRegistry::suggestPlayerName;
         private static final SuggestionProvider<CommandSourceStack> COOLDOWN_SUGGESTIONS
                 = (context, builder) -> getSuggestionsCD(builder);
+        private static final SuggestionProvider<CommandSourceStack> KIT_SUGGESTIONS_PROVIDER = (context, builder) ->
+                suggestKitsBasedOnPermissions(context, builder, "command.kit.claim.");
+        private static CompletableFuture<Suggestions> suggestKitsBasedOnPermissions(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder, String permissionPrefix) {
+            ServerPlayer player = context.getSource().getPlayer();
+            LuckPerms api = LuckPermsProvider.get();
+            User user = api.getUserManager().getUser(player.getUUID());
+            if (user != null) {
+                Data.getAllKitsName().forEach(kitName -> {
+                    String permission = permissionPrefix + kitName;
+                    if (user.getCachedData().getPermissionData().checkPermission(permission).asBoolean()) {
+                        builder.suggest(kitName);
+                    }
+                });
+            }
+            return builder.buildFuture();
+        }
         private static CompletableFuture<Suggestions> suggestPlayerName(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder){
             String input = builder.getRemaining().toLowerCase();
             if (input.isEmpty()){
@@ -170,28 +169,32 @@ public class KitMod {
         private static int handleKit(CommandSourceStack source, String argument) {
             if (source.getEntity() instanceof ServerPlayer) {
                 ServerPlayer player = (ServerPlayer) source.getEntity();
-                for (Kit kit : Data.getData().getKits()) {
-                    if (kit.getName().equals(argument)) {
-                        if (CooldownManager.isOnCooldown(player.getName().getString(), argument)) {
-                            String message = "Кит будет доступен через §6" + parseRemainCooldown(CooldownManager.getRemainCooldwon(player.getName().getString(), argument));
-                            MessageFunctions.broadcastMcSkillMessage(player, message);
-                            return 0;
-                        } else {
-                            for (Kit kit1 : Data.getData().getKits()) {
-                                if (kit1.getName().equals(argument)) {
-                                    for (Item items : kit.getItems()) {
-                                        player.addItem(new ItemStack(ForgeRegistries.ITEMS.getValue(new ResourceLocation(items.getItem())), items.getCount()));
+                User user = LuckPermsProvider.get().getUserManager().getUser(player.getUUID());
+                String permission = "command.kit.claim." + argument;
+                if (user != null && user.getCachedData().getPermissionData().checkPermission(permission).asBoolean()){
+                    for (Kit kit : Data.getData().getKits()) {
+                        if (kit.getName().equals(argument)) {
+                            if (CooldownManager.isOnCooldown(player.getName().getString(), argument)) {
+                                String message = "Кит будет доступен через §6" + parseRemainCooldown(CooldownManager.getRemainCooldwon(player.getName().getString(), argument));
+                                MessageFunctions.broadcastMcSkillMessage(player, message);
+                                return 0;
+                            } else {
+                                for (Kit kit1 : Data.getData().getKits()) {
+                                    if (kit1.getName().equals(argument)) {
+                                        for (Item items : kit.getItems()) {
+                                            player.addItem(new ItemStack(ForgeRegistries.ITEMS.getValue(new ResourceLocation(items.getItem())), items.getCount()));
+                                        }
+                                        CooldownManager.updateOrAddCooldown(player.getName().getString(), argument, kit.getCooldown());
+                                        String message = "Вы получили кит " + "§a" + argument;
+                                        MessageFunctions.broadcastMcSkillMessage(player, message);
+                                        return 1;
                                     }
-                                    CooldownManager.updateOrAddCooldown(player.getName().getString(), argument, kit.getCooldown());
-                                    String message = "Вы получили кит " + "§a" + argument;
-                                    MessageFunctions.broadcastMcSkillMessage(player, message);
-                                    return 1;
                                 }
                             }
                         }
                     }
                 }
-                String message = "Такого кита не существует =)";
+                String message = "У вас нет прав на использование данного кита";
                 MessageFunctions.broadcastMcSkillMessage(player, message);
                 return -1;
             } else {
@@ -262,6 +265,33 @@ public class KitMod {
             return 1;
         }
 
+        private static int kitList(CommandSourceStack source){
+            if(!(source.getEntity() instanceof ServerPlayer)){
+                System.out.println("Tu dolbaeb? Tu ne igrok a mamkin hacker");
+                return 0;
+            }
+            StringBuilder message = new StringBuilder();
+            ServerPlayer player = source.getPlayer();
+            LuckPerms api = LuckPermsProvider.get();
+            User user = api.getUserManager().getUser(player.getUUID());
+            if (user != null) {
+                Data.getAllKitsName().forEach(kitName -> {
+                    String permission = "command.kit.claim." + kitName;
+                    if (user.getCachedData().getPermissionData().checkPermission(permission).asBoolean()) {
+                        if (CooldownManager.isOnCooldown(player.getName().getString(), kitName)){
+                            message.append("§c" + kitName + ", ");
+                        } else {
+                            message.append("§a" + kitName + ", ");
+                        }
+
+                    }
+                });
+            }
+            MessageFunctions.broadcastMcSkillMessage(player, message.toString());
+            return 1;
+        }
+
+
         private static List<Item> readInventoryToList(ServerPlayer player){
             List<Item> itemList = new ArrayList<>();
             for (ItemStack itemStack : player.getInventory().items){
@@ -295,5 +325,6 @@ public class KitMod {
             second = ((seconds % 86400) % 3600) % 60;
             return (day + "д. " + hours + "ч. " + minutes + "м. " + second + "c. ");
         }
+
     }
 }

@@ -21,6 +21,7 @@ public class CooldownManager {
     public static void setPlayersContainer(PlayersContainer playersContainer) {
         CooldownManager.playersContainer = playersContainer;
     }
+
     public static void saveCooldowns(){
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String json = gson.toJson(playersContainer);
