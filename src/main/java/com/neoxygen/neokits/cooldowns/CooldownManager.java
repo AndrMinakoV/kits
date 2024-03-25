@@ -24,10 +24,8 @@ public class CooldownManager {
 
     public static void saveCooldowns(){
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String json = gson.toJson(playersContainer);
-        System.out.println(json);
         try {
-            Files.writeString(Paths.get("config/cooldowns.json"), json);
+            Files.writeString(Paths.get("config/cooldowns.json"), gson.toJson(playersContainer));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -37,7 +35,6 @@ public class CooldownManager {
             Gson gson = new Gson();
             String jsonString = new String(Files.readAllBytes(Paths.get("config/cooldowns.json")));
             playersContainer = gson.fromJson(jsonString, PlayersContainer.class);
-            System.out.println(jsonString);
             if (playersContainer == null){
                 playersContainer = new PlayersContainer();
             }

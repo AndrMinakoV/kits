@@ -116,6 +116,13 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
+    maven {
+        url "https://maven.pkg.jetbrains.space/neoxygen/p/enigmarpg/enigma"
+        credentials {
+            username = spaceUsername
+            password = spacePassword
+        }
+    }
     // Put repositories for dependencies here
     // ForgeGradle automatically adds the Forge maven and Maven Central for you
 
@@ -132,6 +139,9 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.19.2-43.3.0'
     compileOnly 'net.luckperms:api:5.4'
     implementation group: 'org.json', name: 'json', version: '20231013'
+    implementation "org.enigma:chat:0.9-SNAPSHOT"
+
+
 
     // Real mod deobf dependency examples - these get remapped to your current mappings
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api") // Adds JEI API as a compile dependency
@@ -169,13 +179,20 @@ jar.finalizedBy('reobfJar')
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
-            artifact jar
+        maven(MavenPublication) {
+            groupId = "org.enigma"
+            artifactId = "kits"
+            version = "0.9-SNAPSHOT"
+            from components.java
         }
     }
     repositories {
         maven {
-            url "file://${project.projectDir}/mcmodsrepo"
+            url "https://maven.pkg.jetbrains.space/neoxygen/p/enigmarpg/enigma"
+            credentials {
+                username = spaceUsername
+                password = spacePassword
+            }
         }
     }
 }

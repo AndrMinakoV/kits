@@ -26,7 +26,6 @@ public class Data {
             Gson g = new Gson();
             String jsonString = new String(Files.readAllBytes(Paths.get("config/kits.json")));
             data = g.fromJson(jsonString, KitsContainer.class);
-            System.out.println(jsonString);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
