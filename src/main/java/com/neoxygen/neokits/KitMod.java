@@ -2,6 +2,7 @@ package com.neoxygen.neokits;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.mecheniy.chat.utilities.MessageFunctions;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -13,7 +14,7 @@ import com.neoxygen.neokits.cooldowns.CooldownManager;
 import com.neoxygen.neokits.utilities.Data;
 import com.neoxygen.neokits.utilities.Item;
 import com.neoxygen.neokits.utilities.Kit;
-import com.neoxygen.neokits.utilities.MessageFunctions;
+import com.neoxygen.neologger.chat.MessageLogger;
 import net.luckperms.api.LuckPerms;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -25,7 +26,6 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.luckperms.api.LuckPermsProvider;
-import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.model.user.User;
 
 import net.minecraftforge.registries.ForgeRegistries;
@@ -38,10 +38,12 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-@Mod("neokits") // Убедитесь, что здесь указан правильный modid
+@Mod(KitMod.MODID) // Убедитесь, что здесь указан правильный modid
 public class KitMod {
     // Если у вас есть другие переменные и методы, они должны быть здесь
     public static final String MODID = "neokits";
+
+    private static final String path = "/home/andrey/mecheniy/server/MagicRPG1192_logger_public_logs/logs/chat";
     @Mod.EventBusSubscriber(modid = KitMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static class CommandRegistry {
 
@@ -58,8 +60,6 @@ public class KitMod {
                                             }))))
                     .then(Commands.literal("list")
                                     .executes(context -> kitList(context.getSource())))
-//                    .then(Commands.literal("list"))
-//                            .executes(context -> kitList(context.getSource()))
                     .then(Commands.literal("claim")
                             .then(Commands.argument("kitName", StringArgumentType.word())
                                     .suggests(KIT_SUGGESTIONS_PROVIDER)
@@ -185,22 +185,29 @@ public class KitMod {
                                             player.addItem(new ItemStack(ForgeRegistries.ITEMS.getValue(new ResourceLocation(items.getItem())), items.getCount()));
                                         }
                                         CooldownManager.updateOrAddCooldown(player.getName().getString(), argument, kit.getCooldown());
-                                        String message = "Вы получили кит " + "§a" + argument;
+                                        String message = "Вы получили кит " + "§a" + argument + ".";
                                         MessageFunctions.broadcastMcSkillMessage(player, message);
+                                        System.out.println(player.getName().getString() + "получил кит " + argument);
+                                        MessageLogger.logMessageToFile(player.getName().getString() + "получил кит " + argument, path);
                                         return 1;
                                     }
                                 }
                             }
                         }
                     }
+                } else {
+                    String message = "У вас нет прав на использование данного кита.";
+                    MessageFunctions.broadcastMcSkillMessage(player, message);
+                    return -2;
                 }
-                String message = "У вас нет прав на использование данного кита";
+                String message = "Кита с таким названием не существует. ";
                 MessageFunctions.broadcastMcSkillMessage(player, message);
+
                 return -1;
             } else {
-                System.out.println("You are dolbaeb? Комманду выполнять может только игрок");
+                System.out.println("You are dolbaeb? Комманду выполнять может только игрок.");
             }
-            return -2;
+            return -3;
         }
         private static int kitDelete(CommandSourceStack source, String argument){
             if (source.getEntity() instanceof ServerPlayer){
@@ -208,7 +215,7 @@ public class KitMod {
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
                 ServerPlayer player = (ServerPlayer) source.getEntity();
                 if (Data.getData().getKits().removeIf(kit -> kit.getName().equals(argument))){
-                    message = "Вы успешно удалили кит " + "§a" + argument;
+                    message = "Вы успешно удалили кит " + "§a" + argument + ".";
                     try(FileWriter writer = new FileWriter("config/kits.json")){
                         gson.toJson(Data.getData(), writer);
                     } catch (IOException e) {
@@ -218,12 +225,12 @@ public class KitMod {
                     //Data.loadData();
                     return 1;
                 } else {
-                    message = "Такого кита не существует";
+                    message = "Кита с таким названием не существует.";
                     MessageFunctions.broadcastMcSkillMessage(player, message);
                     return -1;
                 }
             } else {
-                System.out.println("You are dolbaeb? Комманду выполнять может только игрок");
+                System.out.println("You are dolbaeb? Комманду выполнять может только игрок.");
             }
             return -2;
         }
@@ -241,7 +248,7 @@ public class KitMod {
                 if (kit.getName().equals(argument)){
                     //тут будет обновление кита
                     kitReCreate(source, kit, cooldown);
-                    String message = "Вы успешно обновили кит " + "§a" + argument;
+                    String message = "Вы успешно обновили кит " + "§a" + argument + ".";
                     MessageFunctions.broadcastMcSkillMessage(player, message);
                     try(FileWriter writer = new FileWriter("config/kits.json")){
                         gson.toJson(Data.getData(), writer);
@@ -254,7 +261,7 @@ public class KitMod {
             assert player != null;
             Kit newKit = new Kit(argument, readInventoryToList(player), parseCooldown(cooldown));
             Data.getData().addKit(newKit);
-            String message = "Вы успешно создали кит " + "§a" + argument;
+            String message = "Вы успешно создали кит " + "§a" + argument + ".";
             MessageFunctions.broadcastMcSkillMessage(player, message);
             try(FileWriter writer = new FileWriter("config/kits.json")){
                 gson.toJson(Data.getData(), writer);
@@ -270,7 +277,7 @@ public class KitMod {
                 System.out.println("Tu dolbaeb? Tu ne igrok a mamkin hacker");
                 return 0;
             }
-            StringBuilder message = new StringBuilder();
+            StringBuilder message = new StringBuilder("Список наборов: ");
             ServerPlayer player = source.getPlayer();
             LuckPerms api = LuckPermsProvider.get();
             User user = api.getUserManager().getUser(player.getUUID());
@@ -279,14 +286,14 @@ public class KitMod {
                     String permission = "command.kit.claim." + kitName;
                     if (user.getCachedData().getPermissionData().checkPermission(permission).asBoolean()) {
                         if (CooldownManager.isOnCooldown(player.getName().getString(), kitName)){
-                            message.append("§c" + kitName + ", ");
+                            message.append("§c" + kitName + " ");
                         } else {
-                            message.append("§a" + kitName + ", ");
+                            message.append("§a" + kitName + " ");
                         }
-
                     }
                 });
             }
+            message.append(".");
             MessageFunctions.broadcastMcSkillMessage(player, message.toString());
             return 1;
         }

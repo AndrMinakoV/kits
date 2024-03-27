@@ -139,7 +139,8 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.19.2-43.3.0'
     compileOnly 'net.luckperms:api:5.4'
     implementation group: 'org.json', name: 'json', version: '20231013'
-    implementation "org.enigma:chat:0.9-SNAPSHOT"
+    implementation "org.enigma:neochat:1.0.3"
+    implementation "org.enigma:neologger:1.0.1"
 
 
 
@@ -181,8 +182,8 @@ publishing {
     publications {
         maven(MavenPublication) {
             groupId = "org.enigma"
-            artifactId = "kits"
-            version = "0.9-SNAPSHOT"
+            artifactId = "neokits"
+            version = "1.0"
             from components.java
         }
     }
