@@ -140,7 +140,7 @@ dependencies {
     compileOnly 'net.luckperms:api:5.4'
     implementation group: 'org.json', name: 'json', version: '20231013'
     implementation "org.enigma:neochat:1.0.3"
-    implementation "org.enigma:neologger:1.0.1"
+    implementation "org.enigma:neologger:1.0.2"
 
 
 

@@ -187,8 +187,6 @@ public class KitMod {
                                         CooldownManager.updateOrAddCooldown(player.getName().getString(), argument, kit.getCooldown());
                                         String message = "Вы получили кит " + "§a" + argument + ".";
                                         MessageFunctions.broadcastMcSkillMessage(player, message);
-                                        System.out.println(player.getName().getString() + "получил кит " + argument);
-                                        MessageLogger.logMessageToFile(player.getName().getString() + "получил кит " + argument, path);
                                         return 1;
                                     }
                                 }
@@ -324,9 +322,6 @@ public class KitMod {
             int day;
             long hours, minutes, second;
             day = (int) TimeUnit.SECONDS.toDays(seconds);
-//            hours =  TimeUnit.SECONDS.toHours(seconds) - (day*24);
-//            minutes = TimeUnit.SECONDS.toMinutes(seconds) - (hours * 60);
-//            second = TimeUnit.SECONDS.toSeconds(seconds) - (minutes * 60);
             hours = (seconds % 86400) / 3600;
             minutes = ((seconds % 86400) % 3600) / 60;
             second = ((seconds % 86400) % 3600) % 60;
